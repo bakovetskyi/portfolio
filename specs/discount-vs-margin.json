@@ -10,7 +10,7 @@
   },
   "height": 380,
   "data": {
-    "url": "data/Super_Step.csv",
+    "url": "data/Super_Store.csv",
     "format": {
       "type": "csv"
     }
