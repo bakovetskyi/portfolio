@@ -10,7 +10,7 @@
   },
   "height": 420,
   "data": {
-    "url": "data/superstore.csv",
+    "url": "data/Super_Store.csv",
     "format": {
       "type": "csv"
     }
