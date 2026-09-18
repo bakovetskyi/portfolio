@@ -1,0 +1,222 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Столи продаються добре — і приносять збиток",
+    "subtitle": "Прибуток за підкатегоріями, Superstore 2023–2026",
+    "anchor": "start",
+    "fontSize": 16,
+    "subtitleFontSize": 12,
+    "subtitleColor": "#666"
+  },
+  "height": 420,
+  "data": {
+    "url": "data/superstore.csv",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "transform": [
+    {
+      "aggregate": [
+        {
+          "op": "sum",
+          "field": "Sales",
+          "as": "sales"
+        },
+        {
+          "op": "sum",
+          "field": "Profit",
+          "as": "profit"
+        }
+      ],
+      "groupby": [
+        "Category",
+        "Sub-Category"
+      ]
+    },
+    {
+      "calculate": "datum.profit / datum.sales * 100",
+      "as": "margin"
+    },
+    {
+      "calculate": "datum.profit / 1000",
+      "as": "profitK"
+    },
+    {
+      "calculate": "datum.sales / 1000",
+      "as": "salesK"
+    },
+    {
+      "calculate": "datum.Category === 'Furniture' ? 'Меблі' : datum.Category === 'Technology' ? 'Техніка' : 'Канцтовари'",
+      "as": "cat"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 2
+      },
+      "encoding": {
+        "y": {
+          "field": "Sub-Category",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Copiers",
+              "Phones",
+              "Accessories",
+              "Paper",
+              "Binders",
+              "Chairs",
+              "Storage",
+              "Appliances",
+              "Furnishings",
+              "Envelopes",
+              "Art",
+              "Labels",
+              "Machines",
+              "Fasteners",
+              "Supplies",
+              "Bookcases",
+              "Tables"
+            ]
+          },
+          "title": null,
+          "axis": {
+            "labelFontSize": 12
+          }
+        },
+        "x": {
+          "field": "profitK",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -25,
+              68
+            ]
+          },
+          "title": "Прибуток, тис. $",
+          "axis": {
+            "format": ".1f",
+            "labelFontSize": 12
+          }
+        },
+        "color": {
+          "condition": {
+            "test": "datum.profit < 0",
+            "value": "#c4554d"
+          },
+          "field": "cat",
+          "type": "nominal",
+          "title": "Категорія",
+          "scale": {
+            "domain": [
+              "Меблі",
+              "Канцтовари",
+              "Техніка"
+            ],
+            "range": [
+              "#8aa8b5",
+              "#6b8f71",
+              "#5b8c9e"
+            ]
+          }
+        },
+        "tooltip": [
+          {
+            "field": "Sub-Category",
+            "type": "nominal",
+            "title": "Підкатегорія"
+          },
+          {
+            "field": "cat",
+            "type": "nominal",
+            "title": "Категорія"
+          },
+          {
+            "field": "profitK",
+            "type": "quantitative",
+            "title": "Прибуток, тис. $",
+            "format": ".1f"
+          },
+          {
+            "field": "salesK",
+            "type": "quantitative",
+            "title": "Продажі, тис. $",
+            "format": ".1f"
+          },
+          {
+            "field": "margin",
+            "type": "quantitative",
+            "title": "Маржа, %",
+            "format": ".1f"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "fontSize": 11,
+        "fontWeight": 500,
+        "align": {
+          "expr": "datum.profitK < 0 ? 'right' : 'left'"
+        },
+        "dx": {
+          "expr": "datum.profitK < 0 ? -6 : 6"
+        },
+        "baseline": "middle"
+      },
+      "encoding": {
+        "y": {
+          "field": "Sub-Category",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Copiers",
+              "Phones",
+              "Accessories",
+              "Paper",
+              "Binders",
+              "Chairs",
+              "Storage",
+              "Appliances",
+              "Furnishings",
+              "Envelopes",
+              "Art",
+              "Labels",
+              "Machines",
+              "Fasteners",
+              "Supplies",
+              "Bookcases",
+              "Tables"
+            ]
+          }
+        },
+        "x": {
+          "field": "profitK",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -25,
+              68
+            ]
+          }
+        },
+        "text": {
+          "field": "profitK",
+          "type": "quantitative",
+          "format": ".1f"
+        },
+        "color": {
+          "condition": {
+            "test": "datum.profit < 0",
+            "value": "#c4554d"
+          },
+          "value": "#333"
+        }
+      }
+    }
+  ]
+}

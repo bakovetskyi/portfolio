@@ -1,0 +1,309 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Центральний регіон роздає найбільші знижки — і найменше заробляє",
+    "subtitle": "Клацніть регіон угорі, щоб побачити, які товарні групи тягнуть його вниз",
+    "anchor": "start",
+    "fontSize": 16,
+    "subtitleFontSize": 12,
+    "subtitleColor": "#666"
+  },
+  "data": {
+    "url": "data/superstore.csv",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "params": [
+    {
+      "name": "segParam",
+      "value": null,
+      "bind": {
+        "input": "select",
+        "options": [
+          null,
+          "Consumer",
+          "Corporate",
+          "Home Office"
+        ],
+        "labels": [
+          "усі",
+          "Consumer",
+          "Corporate",
+          "Home Office"
+        ],
+        "name": "Сегмент клієнтів:  "
+      }
+    },
+    {
+      "name": "catParam",
+      "value": null,
+      "bind": {
+        "input": "select",
+        "options": [
+          null,
+          "Furniture",
+          "Office Supplies",
+          "Technology"
+        ],
+        "labels": [
+          "усі",
+          "Меблі",
+          "Канцтовари",
+          "Техніка"
+        ],
+        "name": "Категорія:  "
+      }
+    }
+  ],
+  "transform": [
+    {
+      "filter": "segParam == null || datum.Segment === segParam"
+    },
+    {
+      "filter": "catParam == null || datum.Category === catParam"
+    }
+  ],
+  "vconcat": [
+    {
+      "title": {
+        "text": "Маржа за регіонами",
+        "anchor": "start",
+        "fontSize": 13,
+        "color": "#444"
+      },
+      "width": 620,
+      "height": 150,
+      "transform": [
+        {
+          "aggregate": [
+            {
+              "op": "sum",
+              "field": "Sales",
+              "as": "sales"
+            },
+            {
+              "op": "sum",
+              "field": "Profit",
+              "as": "profit"
+            },
+            {
+              "op": "mean",
+              "field": "Discount",
+              "as": "discRaw"
+            }
+          ],
+          "groupby": [
+            "Region"
+          ]
+        },
+        {
+          "calculate": "datum.profit / datum.sales * 100",
+          "as": "margin"
+        },
+        {
+          "calculate": "datum.discRaw * 100",
+          "as": "disc"
+        }
+      ],
+      "params": [
+        {
+          "name": "regionSelect",
+          "select": {
+            "type": "point",
+            "fields": [
+              "Region"
+            ]
+          },
+          "value": [
+            {
+              "Region": "Central"
+            }
+          ]
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 2,
+        "cursor": "pointer"
+      },
+      "encoding": {
+        "y": {
+          "field": "Region",
+          "type": "nominal",
+          "title": null,
+          "sort": {
+            "field": "margin",
+            "op": "max",
+            "order": "descending"
+          },
+          "axis": {
+            "labelFontSize": 12
+          }
+        },
+        "x": {
+          "field": "margin",
+          "type": "quantitative",
+          "title": "Маржа, %",
+          "axis": {
+            "labelFontSize": 12
+          }
+        },
+        "color": {
+          "condition": {
+            "param": "regionSelect",
+            "field": "disc",
+            "type": "quantitative",
+            "title": "Середня знижка, %",
+            "scale": {
+              "scheme": "reds",
+              "domain": [
+                8,
+                26
+              ]
+            }
+          },
+          "value": "#dcdcdc"
+        },
+        "tooltip": [
+          {
+            "field": "Region",
+            "type": "nominal",
+            "title": "Регіон"
+          },
+          {
+            "field": "margin",
+            "type": "quantitative",
+            "title": "Маржа, %",
+            "format": ".1f"
+          },
+          {
+            "field": "disc",
+            "type": "quantitative",
+            "title": "Середня знижка, %",
+            "format": ".1f"
+          },
+          {
+            "field": "profit",
+            "type": "quantitative",
+            "title": "Прибуток, $",
+            "format": ",.0f"
+          }
+        ]
+      }
+    },
+    {
+      "title": {
+        "text": "Підкатегорії у вибраному регіоні",
+        "anchor": "start",
+        "fontSize": 13,
+        "color": "#444"
+      },
+      "width": 620,
+      "height": 330,
+      "transform": [
+        {
+          "filter": {
+            "param": "regionSelect"
+          }
+        },
+        {
+          "aggregate": [
+            {
+              "op": "sum",
+              "field": "Sales",
+              "as": "sales"
+            },
+            {
+              "op": "sum",
+              "field": "Profit",
+              "as": "profit"
+            },
+            {
+              "op": "mean",
+              "field": "Discount",
+              "as": "discRaw"
+            }
+          ],
+          "groupby": [
+            "Sub-Category"
+          ]
+        },
+        {
+          "calculate": "datum.profit / datum.sales * 100",
+          "as": "margin"
+        },
+        {
+          "calculate": "datum.discRaw * 100",
+          "as": "disc"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 2
+      },
+      "encoding": {
+        "y": {
+          "field": "Sub-Category",
+          "type": "nominal",
+          "title": null,
+          "sort": {
+            "field": "profit",
+            "op": "sum",
+            "order": "descending"
+          },
+          "axis": {
+            "labelFontSize": 11
+          }
+        },
+        "x": {
+          "field": "profit",
+          "type": "quantitative",
+          "title": "Прибуток, $",
+          "axis": {
+            "format": ",.0f",
+            "labelFontSize": 12
+          }
+        },
+        "color": {
+          "condition": {
+            "test": "datum.profit < 0",
+            "value": "#c4554d"
+          },
+          "value": "#5b8c9e"
+        },
+        "tooltip": [
+          {
+            "field": "Sub-Category",
+            "type": "nominal",
+            "title": "Підкатегорія"
+          },
+          {
+            "field": "profit",
+            "type": "quantitative",
+            "title": "Прибуток, $",
+            "format": ",.0f"
+          },
+          {
+            "field": "sales",
+            "type": "quantitative",
+            "title": "Продажі, $",
+            "format": ",.0f"
+          },
+          {
+            "field": "margin",
+            "type": "quantitative",
+            "title": "Маржа, %",
+            "format": ".1f"
+          },
+          {
+            "field": "disc",
+            "type": "quantitative",
+            "title": "Середня знижка, %",
+            "format": ".1f"
+          }
+        ]
+      }
+    }
+  ]
+}

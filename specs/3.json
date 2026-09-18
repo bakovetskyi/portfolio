@@ -1,0 +1,277 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Що більша середня знижка, то менша маржа",
+    "subtitle": "Кожна крапка — підкатегорія. Клацніть категорію в легенді, щоб залишити тільки її",
+    "anchor": "start",
+    "fontSize": 16,
+    "subtitleFontSize": 12,
+    "subtitleColor": "#666"
+  },
+  "height": 380,
+  "data": {
+    "url": "data/superstore.csv",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "transform": [
+    {
+      "aggregate": [
+        {
+          "op": "mean",
+          "field": "Discount",
+          "as": "discRaw"
+        },
+        {
+          "op": "sum",
+          "field": "Sales",
+          "as": "sales"
+        },
+        {
+          "op": "sum",
+          "field": "Profit",
+          "as": "profit"
+        }
+      ],
+      "groupby": [
+        "Category",
+        "Sub-Category"
+      ]
+    },
+    {
+      "calculate": "datum.discRaw * 100",
+      "as": "disc"
+    },
+    {
+      "calculate": "datum.profit / datum.sales * 100",
+      "as": "margin"
+    },
+    {
+      "calculate": "datum.Category === 'Furniture' ? 'Меблі' : datum.Category === 'Technology' ? 'Техніка' : 'Канцтовари'",
+      "as": "cat"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "color": "#1a1a1a",
+        "strokeWidth": 3
+      },
+      "encoding": {
+        "y": {
+          "datum": 0,
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -20,
+              50
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "text": "нижче цієї лінії — збиток",
+        "align": "right",
+        "baseline": "bottom",
+        "dx": -4,
+        "dy": -6,
+        "fontSize": 11,
+        "fontStyle": "italic",
+        "color": "#c4554d"
+      },
+      "encoding": {
+        "x": {
+          "datum": 42,
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              0,
+              42
+            ]
+          }
+        },
+        "y": {
+          "datum": 0,
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -20,
+              50
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "opacity": 0.85
+      },
+      "params": [
+        {
+          "name": "catSelect",
+          "select": {
+            "type": "point",
+            "fields": [
+              "cat"
+            ]
+          },
+          "bind": "legend"
+        }
+      ],
+      "encoding": {
+        "x": {
+          "field": "disc",
+          "type": "quantitative",
+          "title": "Середня знижка, %",
+          "scale": {
+            "domain": [
+              0,
+              42
+            ]
+          },
+          "axis": {
+            "labelFontSize": 12
+          }
+        },
+        "y": {
+          "field": "margin",
+          "type": "quantitative",
+          "title": "Маржа, %",
+          "scale": {
+            "domain": [
+              -20,
+              50
+            ]
+          },
+          "axis": {
+            "labelFontSize": 12
+          }
+        },
+        "size": {
+          "field": "sales",
+          "type": "quantitative",
+          "title": "Продажі, $",
+          "scale": {
+            "range": [
+              60,
+              900
+            ]
+          },
+          "legend": {
+            "format": ",.0f"
+          }
+        },
+        "color": {
+          "field": "cat",
+          "type": "nominal",
+          "title": "Категорія",
+          "scale": {
+            "domain": [
+              "Меблі",
+              "Канцтовари",
+              "Техніка"
+            ],
+            "range": [
+              "#c4554d",
+              "#6b8f71",
+              "#5b8c9e"
+            ]
+          }
+        },
+        "opacity": {
+          "condition": {
+            "param": "catSelect",
+            "value": 0.85
+          },
+          "value": 0.12
+        },
+        "tooltip": [
+          {
+            "field": "Sub-Category",
+            "type": "nominal",
+            "title": "Підкатегорія"
+          },
+          {
+            "field": "cat",
+            "type": "nominal",
+            "title": "Категорія"
+          },
+          {
+            "field": "disc",
+            "type": "quantitative",
+            "title": "Середня знижка, %",
+            "format": ".1f"
+          },
+          {
+            "field": "margin",
+            "type": "quantitative",
+            "title": "Маржа, %",
+            "format": ".1f"
+          },
+          {
+            "field": "sales",
+            "type": "quantitative",
+            "title": "Продажі, $",
+            "format": ",.0f"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "indexof(['Tables','Bookcases','Supplies','Binders','Copiers','Paper','Machines','Chairs','Storage','Accessories'], datum['Sub-Category']) >= 0"
+        }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 12,
+        "dy": -10,
+        "fontSize": 11,
+        "fontWeight": 500,
+        "color": "#333"
+      },
+      "encoding": {
+        "x": {
+          "field": "disc",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              0,
+              42
+            ]
+          }
+        },
+        "y": {
+          "field": "margin",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -20,
+              50
+            ]
+          }
+        },
+        "text": {
+          "field": "Sub-Category",
+          "type": "nominal"
+        },
+        "opacity": {
+          "condition": {
+            "param": "catSelect",
+            "value": 1
+          },
+          "value": 0.1
+        }
+      }
+    }
+  ]
+}

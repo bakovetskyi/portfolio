@@ -1,0 +1,178 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Знижка понад 20% робить продаж збитковим",
+    "subtitle": "Маржа за рівнем знижки, Superstore 2023–2026",
+    "anchor": "start",
+    "fontSize": 16,
+    "subtitleFontSize": 12,
+    "subtitleColor": "#666"
+  },
+  "height": 360,
+  "data": {
+    "url": "data/superstore.csv",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "transform": [
+    {
+      "aggregate": [
+        {
+          "op": "sum",
+          "field": "Sales",
+          "as": "sales"
+        },
+        {
+          "op": "sum",
+          "field": "Profit",
+          "as": "profit"
+        },
+        {
+          "op": "count",
+          "as": "lines"
+        }
+      ],
+      "groupby": [
+        "Discount"
+      ]
+    },
+    {
+      "calculate": "datum.profit / datum.sales * 100",
+      "as": "margin"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 2
+      },
+      "encoding": {
+        "x": {
+          "field": "Discount",
+          "type": "ordinal",
+          "scale": {
+            "padding": 0.15
+          },
+          "title": "Рівень знижки",
+          "axis": {
+            "format": ".0%",
+            "labelAngle": 0,
+            "labelFontSize": 12
+          }
+        },
+        "y": {
+          "field": "margin",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -205,
+              42
+            ]
+          },
+          "title": "Маржа, %",
+          "axis": {
+            "labelFontSize": 12
+          }
+        },
+        "color": {
+          "condition": {
+            "test": "datum.margin < 0",
+            "value": "#c4554d"
+          },
+          "value": "#5b8c9e"
+        },
+        "tooltip": [
+          {
+            "field": "Discount",
+            "type": "quantitative",
+            "title": "Знижка",
+            "format": ".0%"
+          },
+          {
+            "field": "margin",
+            "type": "quantitative",
+            "title": "Маржа, %",
+            "format": ".1f"
+          },
+          {
+            "field": "profit",
+            "type": "quantitative",
+            "title": "Прибуток, $",
+            "format": ",.0f"
+          },
+          {
+            "field": "lines",
+            "type": "quantitative",
+            "title": "Рядків замовлень",
+            "format": ","
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "rule",
+        "color": "#1a1a1a",
+        "strokeWidth": 2
+      },
+      "encoding": {
+        "y": {
+          "datum": 0,
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -205,
+              42
+            ]
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "fontSize": 11,
+        "fontWeight": 500,
+        "baseline": {
+          "expr": "datum.margin < 0 ? 'top' : 'bottom'"
+        },
+        "dy": {
+          "expr": "datum.margin < 0 ? 5 : -5"
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "Discount",
+          "type": "ordinal",
+          "scale": {
+            "padding": 0.15
+          }
+        },
+        "y": {
+          "field": "margin",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              -205,
+              42
+            ]
+          }
+        },
+        "text": {
+          "field": "margin",
+          "type": "quantitative",
+          "format": ".1f"
+        },
+        "color": {
+          "condition": {
+            "test": "datum.margin < 0",
+            "value": "#c4554d"
+          },
+          "value": "#333"
+        }
+      }
+    }
+  ]
+}
